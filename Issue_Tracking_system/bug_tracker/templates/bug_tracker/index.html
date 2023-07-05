@@ -1,0 +1,130 @@
+{% extends "bug_tracker/layout.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<div class="col-sm-10">
+    <div class="pt-3 ps-2 h4 pb-3"> DASHBOARD</div>
+    <div class="row">
+      <div class="col-sm-12 bg-light2 border-charts mt-5 ms-3 rounded">
+          <div class="d-flex justify-content-between">
+              <div class="h6 pt-3 ps-2"> Projects</div>
+              <div class="pt-3"><button type="button" class="btn btn-color2 btn-color2-shadow btn-sm" data-bs-toggle="modal" data-bs-target="#myModal">New Project</button></div>
+          </div>
+
+          <!-- The Modal -->
+          <div class="modal" id="myModal">
+            <div class="modal-dialog modal-dialog-custom">
+              <div class="modal-content modal-content-custom">
+
+                <!-- Modal Header -->
+                <div class="modal-header border-bottom-0">
+                  <h6 class="modal-title">Add New project</h6>
+                  <button type="button" class="btn-close text-end" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body border-bottom-0">
+                  <form action="#">
+                    <div class="mb-3 mt-1">
+                      <label for="Project_name" class="text-dialog mb-1">Project Name</label>
+                      <input type="text" class="form-control" id="Project_name" placeholder="Enter Project Name " name="Project_name">
+                    </div>
+                    <div class="mb-3">
+                      <label for="project_description" class="text-dialog mb-1">Project Description</label>
+                      <textarea class="form-control" rows="3" id="project_description" placeholder="Enter Project Name" name="project_description"></textarea>
+                    </div>
+                    <div class="mb-3">
+                      <label for="team_members" class="text-dialog mb-1">Add Team Members</label>
+                      <textarea class="form-control" rows="3" id="Team_members" name="team_members"></textarea>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer border-top-0">
+                  <button type="button" class="btn btn-primary btn-sm dialog-custom-button" data-bs-dismiss="modal">Submit</button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <div>
+
+              <table>
+                  <thead>
+                    <tr>
+                      <th>Project</th>
+                      <th>Description</th>
+                      <th>Contributors</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="text-color5"><b>Project 1</b></td>
+                      <td class="truncate">Description 1</td>
+                      <td class="truncate">Contributor1 </td>
+                      <td><i class="material-icons">more_vert</i></td>
+                    </tr>
+                    <tr>
+                      <td class="text-color5"><b>Project 2</b></td>
+                      <td class="truncate">Description 2</td>
+                      <td class="truncate">Contributor3</td>
+                      <td><i class="material-icons ">more_vert</i></td>
+                    </tr>
+                   
+                  </tbody>
+                </table>
+                <div>
+                  <nav aria-label="...">
+                    <ul class="pagination pagination-sm pt-1 ps-1">
+                      <li class="page-item">
+                        <a class="page-link text-color5" href="#" tabindex="-1">1</a>
+                      </li>
+                      <li class="page-item"><a class="page-link text-color5" href="#">2</a></li>
+                      <li class="page-item"><a class="page-link text-color5" href="#">3</a></li>
+                    </ul>
+                  </nav>
+                </div>
+          </div>
+      </div>
+    </div>
+    <div class="row pt-3">
+      <div class="container-fluid ms-1 d-flex">
+      <div class="col-sm-4 transform border-charts rounded bg-charts">
+        <div>
+          <div class="p-2 h6">Tickets by Type</div>
+          <div class="border-bottom my-2 mx-2"></div>
+           <div class="chart-height" id="chart1">
+           </div>
+        </div>
+      </div>
+      <div class="col-sm-4 transform border-charts ms-2 rounded bg-charts">
+        <div>
+          <div class="p-2 h6">Tickets by Priority</div>
+          <div class="border-bottom my-2 mx-2"></div>
+          <div class="chart-height" id="chart2">
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4 transform border-charts ms-3 rounded bg-charts">
+        <div>
+          <div class="p-2 h6">Tickets by status</div>
+          <div class="border-bottom my-2 mx-2"></div>
+          <div class="chart-height" id="chart3">
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block script %}
+<script src="{% static 'bug_tracker/chart1.js' %}"></script>
+<script src="{% static 'bug_tracker/chart2.js' %}"></script>
+<script src="{% static 'bug_tracker/chart3.js' %}"></script>
+<script src="{% static 'bug_tracker/index.js' %}"></script>
+{% endblock %}
