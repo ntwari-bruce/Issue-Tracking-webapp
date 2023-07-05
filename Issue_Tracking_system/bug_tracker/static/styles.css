@@ -1,8 +1,7 @@
 .background-login{
-  background-color: #c2dde6;
+    background-color: #c2dde6;
 }
 .bg{
-  background-image: url('{% static 'bug_tracker/bg5.png' %}');
   background-size: cover;
   background-position: center;
 }
@@ -100,7 +99,6 @@
 }
 .navbar{
   height: 100vh;
-  width: auto;
 }
 .button4{
   background-color: rgb(201, 50, 50);
@@ -115,6 +113,9 @@
 }
 .mb-custom{
   margin-bottom: 0px;
+}
+.nav-custom-w{
+  width: auto;
 }
 .bg-light2{
   background-color: white;
@@ -258,5 +259,5 @@ tbody td {
   color: rgb(70, 68, 68);
 }
 .x{
-  text-decoration: none;
+    text-decoration: none;
 }
