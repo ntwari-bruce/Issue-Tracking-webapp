@@ -70,9 +70,6 @@
   {% block body %}
   <body class="background-login">
     <div class="container">
-      {% if message %}
-      <div>{{ message }}</div>
-      {% endif %}
       <div class="d-flex flex-column mt-5 mx-auto">
          <div class="text-center text-white h2">Bug Tracker</div>
          <div class="text-center text-color1">Login or Register</div>
@@ -94,10 +91,13 @@
                         <span class="material-symbols-outlined border-div2 shadow-div1 rounded1 input-custom input-group-text">key</span>
                         <input type="text" class="form-control border-div2 shadow-div1 rounded1" name="password" placeholder="password">
                       </div>
+                      {% if message %}
+                      <p style="color: red; font-size: smaller;" class="text-center">{{ message }}</p>
+                      {% endif %}
                 </div>
              </div>
              <div class="row">
-                <div class="color-sm-12 mt-4 mx-auto custom-width text-center">
+                <div class="color-sm-12 mt-3 mx-auto custom-width text-center">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
                     <label class="form-check-label font1" for="flexCheckDefault">

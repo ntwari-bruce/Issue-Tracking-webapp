@@ -15,6 +15,8 @@
           </div>
 
           <!-- The Modal -->
+          <form action="{% url 'create_project' %}" method="POST">
+            {% csrf_token %}
           <div class="modal" id="myModal">
             <div class="modal-dialog modal-dialog-custom">
               <div class="modal-content modal-content-custom">
@@ -27,33 +29,34 @@
 
                 <!-- Modal body -->
                 <div class="modal-body border-bottom-0">
-                  <form action="#">
                     <div class="mb-3 mt-1">
                       <label for="Project_name" class="text-dialog mb-1">Project Name</label>
-                      <input type="text" class="form-control" id="Project_name" placeholder="Enter Project Name " name="Project_name">
+                      <input type="text" class="form-control" id="Project_name" placeholder="Enter Project Name " name="project_name" required>
                     </div>
                     <div class="mb-3">
                       <label for="project_description" class="text-dialog mb-1">Project Description</label>
-                      <textarea class="form-control" rows="3" id="project_description" placeholder="Enter Project Name" name="project_description"></textarea>
+                      <textarea class="form-control" rows="3" id="project_description" placeholder="Enter Project Name" name="project_description" required></textarea>
                     </div>
                     <div class="mb-3">
-                      <label for="team_members" class="text-dialog mb-1">Add Team Members</label>
-                      <textarea class="form-control" rows="3" id="Team_members" name="team_members"></textarea>
+                      <label for="selx" class="text-dialog mb-1">Add Team Members</label>
+                      <select multiple class="form-select" id="selx" name="sellist2a" required>
+                        {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
+                        {% endfor %}
+                      </select>
                     </div>
-                  </form>
                 </div>
-
                 <!-- Modal footer -->
                 <div class="modal-footer border-top-0">
                   <button type="submit" class="btn btn-primary btn-sm dialog-custom-button" data-bs-dismiss="modal">Submit</button>
                 </div>
-
               </div>
             </div>
           </div>
           <div>
-
-              <table>
+          </form>
+              
+              <table class="table-responsive table-hover">
                   <thead>
                     <tr>
                       <th>Project</th>
@@ -63,19 +66,14 @@
                     </tr>
                   </thead>
                   <tbody>
+                    {% for project in projects %}
                     <tr>
-                      <td class="text-color5"><b>Project 1</b></td>
-                      <td class="truncate">Description 1</td>
-                      <td class="truncate">Contributor1 </td>
+                      <td class="text-color5 size1"><b>{{ project.project_name }}</b></td>
+                      <td class="truncate size1">{{ project.project_description }}</td>
+                      <td class="truncate size1">{{ project.team_members.all|join:", " }}</td>
                       <td><i class="material-icons">more_vert</i></td>
                     </tr>
-                    <tr>
-                      <td class="text-color5"><b>Project 2</b></td>
-                      <td class="truncate">Description 2</td>
-                      <td class="truncate">Contributor3</td>
-                      <td><i class="material-icons ">more_vert</i></td>
-                    </tr>
-                   
+                    {% endfor %}
                   </tbody>
                 </table>
                 <div>
@@ -123,8 +121,8 @@
   </div>
 {% endblock %}
 {% block script %}
-<script src="{% static 'bug_tracker/chart1.js' %}"></script>
-<script src="{% static 'bug_tracker/chart2.js' %}"></script>
-<script src="{% static 'bug_tracker/chart3.js' %}"></script>
-<script src="{% static 'bug_tracker/index.js' %}"></script>
+<script src="{% static 'chart1.js' %}"></script>
+<script src="{% static 'chart2.js' %}"></script>
+<script src="{% static 'chart3.js' %}"></script>
+<script src="{% static 'index.js' %}"></script>
 {% endblock %}

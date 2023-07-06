@@ -261,3 +261,7 @@ tbody td {
 .x{
     text-decoration: none;
 }
+.alertx{
+  color:red;
+  font-size: smaller;
+}

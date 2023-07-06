@@ -63,6 +63,9 @@
                     <span class="material-symbols-outlined md-19 border-div2 shadow-div1 rounded1 input-custom input-group-text">key</span>
                     <input type="text" class="form-control border-div2 shadow-div1 rounded1" id="Confirm" name="password_confirm" placeholder="Confirm Password">
                   </div>
+                  {% if message %}
+                  <p style="color: red; font-size: smaller;" class="text-center">{{ message }}</p>
+                  {% endif %}
             </div>
          </div>
     
