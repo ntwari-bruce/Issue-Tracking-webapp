@@ -12,18 +12,20 @@
          <div class="text-center text-color1">Login or Register</div>
          <div class="mt-5 rounded mx-auto bg-light width-custom3 shodow-div1">
             <div class="text-center p-3 text-color3"><b>Sign Up</b></div>
+            <form action="{% url 'register' %}" method="POST">
+                {% csrf_token %}
             <div class="row">
                <div class="col-sm-6 mt-4 mx-auto ps-4">
                 <div class="input-group mb-2 ">
                     <span class="material-symbols-outlined md-19 border-div2 shadow-div1 rounded1 input-custom input-group-text">person</span>
-                    <input type="text" class="form-control border-div2 shadow-div1 rounded1" id="first" placeholder="First Name">
+                    <input type="text" class="form-control border-div2 shadow-div1 rounded1" id="first" name="first_name" placeholder="First Name">
                   </div>
                </div>
 
                <div class="col-sm-6 mt-4 mx-auto pe-4">
                 <div class="input-group mb-2 ">
                     <span class="material-symbols-outlined md-19 border-div2 shadow-div1 rounded1 input-custom input-group-text">person</span>
-                    <input type="text" class="form-control border-div2 shadow-div1 rounded1" id="last" placeholder="Last Name">
+                    <input type="text" class="form-control border-div2 shadow-div1 rounded1" id="last" name="last_name" placeholder="Last Name">
                   </div>
                </div>
             </div>
@@ -32,7 +34,7 @@
                 <div class="col-sm-12 mt-2 mx-auto pe-4 ps-4 ">
                     <div class="input-group mb-1">
                         <span class="material-symbols-outlined md-19 border-div2 shadow-div1 rounded1 input-custom input-group-text">phone_iphone</span>
-                        <input type="text" class="form-control border-div2 shadow-div1 rounded1" id="phone" placeholder="Phone Number">
+                        <input type="text" class="form-control border-div2 shadow-div1 rounded1" id="phone" name="phone_number" placeholder="Phone Number">
                       </div>
                 </div>
              </div>
@@ -41,7 +43,7 @@
               <div class="col-sm-12 mt-2 mx-auto pe-4 ps-4 ">
                   <div class="input-group mb-1">
                       <span class="material-symbols-outlined md-19 border-div2 shadow-div1 rounded1 input-custom input-group-text">email</span>
-                      <input type="email" class="form-control border-div2 shadow-div1 rounded1" id="email" placeholder="Email">
+                      <input type="email" class="form-control border-div2 shadow-div1 rounded1" id="email" name="email" placeholder="Email">
                     </div>
               </div>
            </div>
@@ -50,7 +52,7 @@
               <div class="col-sm-12 mt-2 mx-auto pe-4 ps-4 ">
                   <div class="input-group mb-1">
                       <span class="material-symbols-outlined md-19 border-div2 shadow-div1 rounded1 input-custom input-group-text">key</span>
-                      <input type="text" class="form-control border-div2 shadow-div1 rounded1" id="password" placeholder="Password">
+                      <input type="text" class="form-control border-div2 shadow-div1 rounded1" id="password" name="password" placeholder="Password">
                     </div>
               </div>
            </div>
@@ -59,19 +61,20 @@
             <div class="col-sm-12 mt-2 mx-auto pe-4 ps-4 ">
                 <div class="input-group mb-1">
                     <span class="material-symbols-outlined md-19 border-div2 shadow-div1 rounded1 input-custom input-group-text">key</span>
-                    <input type="text" class="form-control border-div2 shadow-div1 rounded1" id="Confirm" placeholder="Confirm Password">
+                    <input type="text" class="form-control border-div2 shadow-div1 rounded1" id="Confirm" name="password_confirm" placeholder="Confirm Password">
                   </div>
             </div>
          </div>
     
              <div class="row">
                   <div class="col-sm-12 mt-3 mx-auto mb-4 text-center">
-                    <button type="button" class="btn btn-primary button-color1 shadow-button1">Sign In</button>
+                    <button type="submit" class="btn btn-primary button-color1 shadow-button1">Sign In</button>
                   </div>
              </div>
          </div>
          </div>
       </div>
+    </form>
     <div class="mx-auto custom-width2">
         <div class="text-center custom-font2 text-color2 mt-5 mb-3">Already have account? <a href="{% url 'layout' %}" class="text-color2 custom-font2 x">login Here.</a></div>
           <div class="text-center mt-2 "><footer><span class="material-icons md-18 md-light">

@@ -12,10 +12,11 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <link href="{% static 'styles.css' %}" rel="stylesheet">
+    
 </head>
 <body>
  {% if user.is_authenticated %}
- <body class="bg">
+ <body class="bg" style="background-image: url('/static/bg5.png');">
   <div class="container-fluid">
       <div class="row">
           <div class="col-sm-2 nav-custom-w shodow">
@@ -46,16 +47,21 @@
                       <li class="nav-item mt-3">
                           <div class="border-bottom mt-3 mb-2"></div>
                        </li>
+                       <form action="{% url 'logout' %}" method="POST">
+                        {% csrf_token %}
                        <li class="nav-item text-center">
                           <div class="button1">
                               <button type="submit" class="btn  btn-sm button4 shadow2 text-center">Logout</button>
                           </div>
                        </li>
+                       </form>
                     </ul>
                   </div>
                 </nav>
           </div>
             {% block content %}
+            {% endblock %}
+            {% block script %}
             {% endblock %}
       </div>
   </div>
@@ -64,15 +70,20 @@
   {% block body %}
   <body class="background-login">
     <div class="container">
+      {% if message %}
+      <div>{{ message }}</div>
+      {% endif %}
       <div class="d-flex flex-column mt-5 mx-auto">
          <div class="text-center text-white h2">Bug Tracker</div>
          <div class="text-center text-color1">Login or Register</div>
          <div class="mt-5 rounded border-div1 mx-auto bg-light shodow-div1">
+          <form action="{% url 'login_view' %}" method="POST">
+            {% csrf_token %}
             <div class="row">
                <div class="col-sm-12 mt-4 custom-width mx-auto ">
                 <div class="input-group mb-2">
                     <span class="material-symbols-outlined border-div2 shadow-div1 rounded1 input-custom input-group-text">mail</span>
-                    <input type="text" class="form-control border-div2 shadow-div1 rounded1" placeholder="Email">
+                    <input type="text" class="form-control border-div2 shadow-div1 rounded1" name="email" placeholder="Email">
                   </div>
                </div>
             </div>
@@ -81,7 +92,7 @@
                 <div class="col-sm-12 mt-2 custom-width mx-auto ">
                     <div class="input-group mb-1">
                         <span class="material-symbols-outlined border-div2 shadow-div1 rounded1 input-custom input-group-text">key</span>
-                        <input type="text" class="form-control border-div2 shadow-div1 rounded1" placeholder="password">
+                        <input type="text" class="form-control border-div2 shadow-div1 rounded1" name="password" placeholder="password">
                       </div>
                 </div>
              </div>
@@ -97,12 +108,13 @@
              </div>
              <div class="row">
                   <div class="col-sm-12 mt-3 mx-auto mb-4 text-center">
-                    <button type="button" class="btn btn-primary button-color1 shadow-button1 ">Sign In</button>
+                    <button type="submit" class="btn btn-primary button-color1 shadow-button1 ">Sign In</button>
                   </div>
              </div>
          </div>
          </div>
       </div>
+    </form>
       <div class="d-flex mt-2 mx-auto custom-width2">
         <div class="col-sm-6 text-start text-white custom-font2">
                 forgot Password?

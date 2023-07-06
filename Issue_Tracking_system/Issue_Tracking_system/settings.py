@@ -25,6 +25,7 @@ SECRET_KEY = 'django-insecure-p%^k=%9$j!2pz$y37kw1#qp1-f3ncv=p5(!+ba3&g(y-f!$amd
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
 ALLOWED_HOSTS = []
 
 
@@ -123,9 +124,9 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-    }
-}
+AUTH_USER_MODEL = 'bug_tracker.CustomUser'
 
+AUTHENTICATION_BACKENDS = [
+    'bug_tracker.backends.CustomUserBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
