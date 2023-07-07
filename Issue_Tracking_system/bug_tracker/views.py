@@ -7,6 +7,7 @@ from django.contrib import auth
 from django.contrib.auth import authenticate,login as auth_login, logout as auth_logout, get_backends
 from django.urls import reverse
 from .backends import CustomUserBackend
+from django.http import JsonResponse
 
 # Create your views here
 def index(request):
@@ -76,21 +77,51 @@ def login_view(request):
 
 # logout the user
 def logout(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         auth_logout(request)
         return render(request,"bug_tracker/layout.html")
 
 # getting back to layout
 def layout(request):
-    return render(request, 'bug_tracker/layout.html',)
+    return render(request, "bug_tracker/layout.html",)
 
 # Creating a new project
 def create_project(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         project_name = request.POST.get("project_name")
         project_description = request.POST.get("project_description")
         team_members_ids = request.POST.getlist("sellist2a")
-        project = Project(project_name=project_name, project_description=project_description)
+        project = Project(project_name=project_name, project_description=project_description, project_creator=request.user)
+        project.save()
+        team_members = CustomUser.objects.filter(pk__in=team_members_ids)
+        project.team_members.set(team_members)
+        return HttpResponseRedirect(reverse("index"))
+        
+
+# Retrieving project details for editing project
+def project_detail(request, pk):
+    try:
+        project = Project.objects.get(pk=pk)
+        data = {
+            'project_name': project.project_name,
+            'project_description': project.project_description,
+            'team_members': list(project.team_members.values_list('id', flat=True)),
+        }
+        return JsonResponse({'project': data})
+    except Project.DoesNotExist:
+        return JsonResponse({'error': 'Project not found'}, status=404)
+# Updating the edited project
+def update_project(request):
+    if request.method == "POST":
+        project_id = request.POST.get("project_id")
+        project_name = request.POST.get("project_name")
+        project_description = request.POST.get("project_description")
+        team_members_ids = request.POST.getlist("sellist2a")
+
+        # Update in the database
+        project = Project.objects.get(id=project_id)
+        project.project_name = project_name
+        project.project_description = project_description
         project.save()
         team_members = CustomUser.objects.filter(pk__in=team_members_ids)
         project.team_members.set(team_members)

@@ -16,6 +16,7 @@ class Project(models.Model):
     project_name = models.CharField(max_length=255)
     project_description = models.TextField()
     team_members = models.ManyToManyField(CustomUser)
+    project_creator = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='created_projects', null=True)
 
     def __str__(self):
         return self.project_name

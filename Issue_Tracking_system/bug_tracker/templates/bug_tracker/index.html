@@ -13,8 +13,51 @@
               <div class="h6 pt-3 ps-2"> Projects</div>
               <div class="pt-3"><button type="button" class="btn btn-color2 btn-color2-shadow btn-sm" data-bs-toggle="modal" data-bs-target="#myModal">New Project</button></div>
           </div>
+          <div>
+             <!-- The Modal for editing a project-->
+          <form action="{% url 'update_project' %}" method='POST'>
+            {% csrf_token %}
+          <div class="modal" id="myModalp">
+            <div class="modal-dialog modal-dialog-custom">
+              <div class="modal-content modal-content-custom">
 
-          <!-- The Modal -->
+                <!-- Modal Header -->
+                <div class="modal-header border-bottom-0">
+                  <h6 class="modal-title">Edit project</h6>
+                  <button type="button" class="btn-close text-end" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body border-bottom-0">
+                    <input type="hidden" id="project_id" name="project_id">
+                    <div class="mb-3 mt-1">
+                      <label for="Project_name" class="text-dialog mb-1">Project Name</label>
+                      <input type="text" class="form-control" id="Project_name" placeholder="Enter Project Name " name="project_name" required>
+                    </div>
+                    <div class="mb-3">
+                      <label for="project_description" class="text-dialog mb-1">Project Description</label>
+                      <textarea class="form-control" rows="3" id="project_description" placeholder="Enter Project Name" name="project_description" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                      <label for="selx" class="text-dialog mb-1">Add Team Members</label>
+                      <select multiple class="form-select" id="selx" name="sellist2a" required>
+                        {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                </div>
+                <!-- Modal footer -->
+                <div class="modal-footer border-top-0">
+                  <button type="submit" class="btn btn-primary btn-sm dialog-custom-button" data-bs-dismiss="modal">Submit</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+          </div>
+
+          <!-- The Modal for creating project -->
           <form action="{% url 'create_project' %}" method="POST">
             {% csrf_token %}
           <div class="modal" id="myModal">
@@ -53,9 +96,8 @@
               </div>
             </div>
           </div>
+        </form>
           <div>
-          </form>
-              
               <table class="table-responsive table-hover">
                   <thead>
                     <tr>
@@ -71,7 +113,14 @@
                       <td class="text-color5 size1"><b>{{ project.project_name }}</b></td>
                       <td class="truncate size1">{{ project.project_description }}</td>
                       <td class="truncate size1">{{ project.team_members.all|join:", " }}</td>
-                      <td><i class="material-icons">more_vert</i></td>
+                      <td>
+                        <div class="dropdown">
+                          <i class="material-icons more-vert-icon4" id="dropdownMenuButton{{ project.id }}" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-project-id="{{ project.id }}">more_vert</i>
+                          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ project.id }}">
+                            <a class="dropdown-item edit-linkp" data-project-id="{{ project.id }}">Edit project</a>
+                            <a class="dropdown-item" href="#">Delete project</a>
+                          </div>
+                    </td>
                     </tr>
                     {% endfor %}
                   </tbody>
@@ -90,6 +139,7 @@
           </div>
       </div>
     </div>
+
     <div class="row pt-3">
       <div class="container-fluid ms-1 d-flex">
       <div class="col-sm-4 transform border-charts rounded bg-charts">
@@ -119,6 +169,7 @@
       </div>
     </div>
   </div>
+
 {% endblock %}
 {% block script %}
 <script src="{% static 'chart1.js' %}"></script>
