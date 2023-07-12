@@ -10,7 +10,7 @@
     <div class="row">
       <div class="col-sm-12 bg-light2 border-charts mt-5 ms-3 rounded">
           <div class="d-flex justify-content-between">
-              <div class="h6 pt-3 ps-2"> Projects</div>
+              <div class="h6 pt-3 ps-2"> Projects {{ proect_id }}</div>
               <div class="pt-3"><button type="button" class="btn btn-color2 btn-color2-shadow btn-sm" data-bs-toggle="modal" data-bs-target="#myModal">New Project</button></div>
           </div>
           <div>
@@ -108,31 +108,34 @@
                     </tr>
                   </thead>
                   <tbody>
-                    {% for project in projects %}
-                    <tr>
-                      <td class="text-color5 size1"><b>{{ project.project_name }}</b></td>
-                      <td class="truncate size1">{{ project.project_description }}</td>
-                      <td class="truncate size1">{{ project.team_members.all|join:", " }}</td>
-                      <td>
-                        <div class="dropdown">
-                          <i class="material-icons more-vert-icon4" id="dropdownMenuButton{{ project.id }}" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-project-id="{{ project.id }}">more_vert</i>
-                          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ project.id }}">
-                            <a class="dropdown-item edit-linkp" data-project-id="{{ project.id }}">Edit project</a>
-                            <a class="dropdown-item" href="#">Delete project</a>
+                    {% for project in project_list %}
+                      <tr>
+                        
+                        <td class="text-color5 size1"><b><a class="text-color5 size1 x" href="{% url 'project_view' project.id %}">{{ project.project_name }}</b></a></td>
+                        
+                        <td class="truncate size1">{{ project.project_description }}</td>
+                        <td class="truncate size1">{{ project.team_members.all|join:", " }}</td>
+                        <td>
+                          <div class="dropdown">
+                            <i class="material-icons more-vert-icon4" id="dropdownMenuButton{{ project.id }}" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-project-id="{{ project.id }}">more_vert</i>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ project.id }}">
+                              <a class="dropdown-item edit-linkp" data-project-id="{{ project.id }}">Edit project</a>
+                              <a class="dropdown-item delete-linkp" data-project-id="{{ project.id }}">Delete project</a>
+                            </div>
                           </div>
-                    </td>
-                    </tr>
+                        </td>
+                      </tr>
                     {% endfor %}
                   </tbody>
                 </table>
                 <div>
                   <nav aria-label="...">
                     <ul class="pagination pagination-sm pt-1 ps-1">
-                      <li class="page-item">
-                        <a class="page-link text-color5" href="#" tabindex="-1">1</a>
+                      {% for page in page_range %}
+                      <li class="page-item text-color5 {%  if page_number == page %} active {% endif %}">
+                        <a class="page-link text-color5 {%  if page_number == page %} active {% endif %}" href="?page={{ page }}" tabindex="-1">{{ page }}</a>
                       </li>
-                      <li class="page-item"><a class="page-link text-color5" href="#">2</a></li>
-                      <li class="page-item"><a class="page-link text-color5" href="#">3</a></li>
+                      {% endfor %}
                     </ul>
                   </nav>
                 </div>

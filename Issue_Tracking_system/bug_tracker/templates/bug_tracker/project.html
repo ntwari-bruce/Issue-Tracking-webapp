@@ -1,0 +1,356 @@
+{% extends "bug_tracker/layout.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<div class="col-sm-10">
+    <div class="pt-3 ps-2 h4 pb-3"> Project</div>
+    <div class="row">
+    <div class="col-sm-6"><p class="ps-2 h6">{{ project.project_name }}</p></div>
+    <div class="col-sm-4">
+      <p class="text-start truncate2 h6">{{ project.project_description }}</p>
+    </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-4 ms-3 bg-light2 border-charts mt-2 rounded h-50">
+          <div class="d-flex justify-content-between">
+              <div class="h6 pt-3 ps-2">Team</div>
+              <div class="pt-3">
+                <button type="button" class="btn btn-color2 btn-color2-shadow btn-sm" 
+                data-bs-toggle="modal" data-bs-target="#myModal">New Member</button></div>
+          </div>
+          <!--MOdel for updating new members -->
+          <!-- The Modal -->
+          <form action="{% url 'update_members' project.id %}" method="POST">
+            {% csrf_token %}
+          <div class="modal" id="myModal">
+            <div class="modal-dialog modal-dialog-custom">
+              <div class="modal-content modal-content-custom">
+
+                <!-- Modal Header -->
+                <div class="modal-header border-bottom-0">
+                  <h6 class="modal-title">Add New Member</h6>
+                  <button type="button" class="btn-close text-end" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body border-bottom-0">
+                    <div class="mb-3">
+                      <label for="selz" class="text-dialog mb-1">Add Team Members</label>
+                      <select multiple class="form-select" id="selz" name="sellist2b" required>
+                        {% for user in users %}
+                        {% if user in team_members %}
+                        <option value="{{ user.id }}" selected>{{ user.first_name }} {{ user.last_name }}</option>
+                        {% else %}
+                          <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
+                        {% endif %}
+                        {% endfor %}
+                      </select>
+                    </div>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer border-top-0">
+                  <button type="submit" class="btn btn-primary btn-sm dialog-custom-button" 
+                  data-bs-dismiss="modal">Add New Member</button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+          </form>
+          <!--popover for removing dev-->
+          <div id="popover-content3"  style="display: none;">
+            <div class="popover-link">
+              <a class="popover-link edit-link2" type="button">Delete</a>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+
+              <table>
+                  <thead>
+                    <tr>
+                      <th class="size1">Name</th>
+                      <th class="size1">Email</th>
+                      <th class="size1">Phone</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for team_member in team_members%}
+                    <tr>
+                      <td class="text-color6 truncate2t size1"><b>{{ team_member.first_name }} {{ team_member.last_name }} </b></td>
+                      <td class="truncate size1">{{ team_member.email }}</td>
+                      <td class="truncate size1">{{ team_member.phone_number }}</td>
+                      <td>
+                        <div class="dropdown">
+                          <i class="material-icons" id="dropdownMenuButton{{ project.id }}" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">more_vert</i>
+                          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item remove-link" data-member-id="{{ team_member.id }}" data-project-id="{{ project.id }}">Remove member</a>
+                          </div>
+                        </div>
+                        
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+                <div>
+                  <nav aria-label="...">
+                    <ul class="pagination pagination-sm pt-1 ps-1">
+                      {% for page in page_range %}
+                      <li class="page-item text-color5 {%  if page_number == page %} active {% endif %}">
+                        <a class="page-link text-color5 {%  if page_number == page %} active {% endif %}" href="?page={{ page }}" tabindex="-1">{{ page }}</a>
+                      </li>
+                      {% endfor %}
+                    </ul>
+                  </nav>
+                </div>
+          </div>
+      </div>
+         
+      <!-- another tab-->
+     <div class="col-sm-7 ms-4 bg-light2 border-charts mt-2 rounded"> 
+      <div class="d-flex justify-content-between">
+          <div class="h6 pt-3 ps-2"> Tickets</div>
+          <div class="pt-3"><button type="button" class="btn btn-color2 btn-color2-shadow btn-sm" 
+            data-bs-toggle="modal" 
+            data-bs-target="#myModalT">New Ticket</button></div>
+      </div>
+      
+      <!--modal for adding new Ticket-->
+      <div class="modal" id="myModalT">
+        <div class="modal-dialog modal-dialog-custom">
+          <div class="modal-content modal-content-custom">
+
+            <!-- Modal Header -->
+            <div class="modal-header border-bottom-0">
+              <h6 class="modal-title size1">Add New Ticket</h6>
+              <button type="button" class="btn-close text-end" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Modal body -->
+            <form action="{% url 'create_ticket' project.id %}" method="POST">
+              {% csrf_token %}
+            <div class="modal-body border-bottom-0">
+                <div class="mb-2 mt-1">
+                  <label for="Project_name" class="text-dialog mb-1 size1">Title</label>
+                  <input type="text" class="form-control" id="title" placeholder="Enter the title" name="title">
+                </div>
+                <div class="mb-2">
+                  <label for="Ttcket_description" class="text-dialog mb-1 size1">Ticket Description</label>
+                  <textarea class="form-control" rows="2" id="title_description" 
+                  placeholder="Enter Description" name="description"></textarea>
+                </div>
+                <div class="row">
+                <div class="col-sm-6 mb-2">
+                  <label for="sellist2c" class="text-dialog mb-1 size1">Add Team Members</label>
+                  <select multiple class="form-select" id="sellist2c" name="sellist2c">
+                    {% for team_member in team_members %}
+                    <option value="{{ team_member.id }}">{{ team_member.first_name }} {{ team_member.last_name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-sm-6 mb-3">
+                  <label for="time" class="text-dialog mb-1 size1">Time Estimate(Hours)</label>
+                  <input type="number" class="form-control" id="time" placeholder="Enter the Time" name="time">
+                </div>
+                </div>
+                <div class="row">
+                   <div class="col-sm-4">
+                    <label for="typec" class="text-dialog mb-1 size1">Type</label>
+                    <select class="form-select" id="typec" name="typec">
+                      <option>Bug</option>
+                      <option>Feature</option>
+                      <option>Task</option>
+                    </select>
+                   </div>
+                   <div class="col-sm-4">
+                    <label for="priorityc" class="text-dialog mb-1 size1">Priority</label>
+                    <select class="form-select" id="priorityc" name="priorityc">
+                      <option>Low</option>
+                      <option>Medium</option>
+                      <option>Hight</option>
+                    </select>
+                   </div>
+                   <div class="col-sm-4">
+                    <label for="status" class="text-dialog mb-1 size1">Status</label>
+                    <select class="form-select" id="status" name="status">
+                      <option>New</option>
+                      <option>In progress</option>
+                      <option>Completed</option>
+                    </select>
+                   </div>
+                </div>
+            </div>
+            <!-- Modal footer -->
+            <div class="modal-footer border-top-0">
+              <button type="submit" class="btn btn-primary btn-sm dialog-custom-button" data-bs-dismiss="modal">Submit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+      <!-- The Modal -->
+      <form action="{% url 'update_ticket' project.id %}" method="POST">
+        {% csrf_token %}
+      <div class="modal" id="myModal2">
+        <div class="modal-dialog modal-dialog-custom">
+          <div class="modal-content modal-content-custom">
+
+            <!-- Modal Header -->
+            <div class="modal-header border-bottom-0">
+              <h6 class="modal-title size1">Edit Ticket</h6>
+              <button type="button" class="btn-close text-end" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="modal-body border-bottom-0">
+                <input type="hidden" id="ticket_id" name="ticket_id" value="{{ ticket.id }}">
+                <div class="mb-2 mt-1">
+                  <label for="Project_name" class="text-dialog mb-1 size1">Title</label>
+                  <input type="text" class="form-control" id="ticket-title" placeholder="Enter the title" name="Title">
+                  
+                </div>
+                <div class="mb-2">
+                  <label for="Ttcket_description" class="text-dialog mb-1 size1">Ticket Description</label>
+                  <textarea class="form-control" rows="2" id="ticket-description" 
+                  placeholder="Enter Description" name="title_description"></textarea>
+                </div>
+                <div class="row">
+                <div class="col-sm-6 mb-2">
+                  <label for="ticket-sel" class="text-dialog mb-1 size1">Assign Devs</label>
+                  <select multiple class="form-select" id="ticket-sel" name="ticket-sel">
+                    {% for team_member in team_members %}
+                      {% if team_member.id in ticket.assigned_devs %}
+                        <option value="{{ team_member.id }}" selected>{{ team_member.first_name }} {{ team_member.last_name }}</option>
+                      {% else %}
+                        <option value="{{ team_member.id }}">{{ team_member.first_name }} {{ team_member.last_name }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                  
+                </div>
+                <div class="col-sm-6 mb-3">
+                  <label for="time" class="text-dialog mb-1 size1">Time Estimate(Hours)</label>
+                  <input type="number" class="form-control" id="ticket-time" placeholder="Enter the Time" name="Time">
+                </div>
+                </div>
+                <div class="row">
+                   <div class="col-sm-4">
+                    <label for="type" class="text-dialog mb-1 size1">Type</label>
+                    <select class="form-select" id="ticket-type" name="priority">
+                      <option>Bug</option>
+                      <option>Feature</option>
+                      <option>Task</option>
+                    </select>
+                   </div>
+                   <div class="col-sm-4">
+                    <label for="priority" class="text-dialog mb-1 size1">Priority</label>
+                    <select class="form-select" id="ticket-priority" name="priority">
+                      <option>Low</option>
+                      <option>Medium</option>
+                      <option>High</option>
+                    </select>
+                   </div>
+                   <div class="col-sm-4">
+                    <label for="status" class="text-dialog mb-1 size1">Status</label>
+                    <select class="form-select" id="ticket-status" name="status">
+                      <option>New</option>
+                      <option>In progress</option>
+                      <option>Completed</option>
+                    </select>
+                   </div>
+                </div>
+            </div>
+            <!-- Modal footer -->
+            <div class="modal-footer border-top-0">
+              <button type="submit" class="btn btn-primary btn-sm dialog-custom-button" data-bs-dismiss="modal">Submit</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      </form>
+  
+      <div class="table-responsive table-hover">
+
+          <table>
+              <thead>
+                <tr>
+                  <th class="size1">Ticket Title</th>
+                  <th class="size1">Description</th>
+                  <th class="size1">Ticket Author</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for ticket in tickets %}
+                <tr class="ticket-row" data-ticket-id="{{ ticket.id }}" data-project-id="{{ project.id}}">
+                  <td class="text-color6 size1 truncate2a"><b>{{ ticket.title }}</b></td>
+                  <td class="truncate size1">{{ ticket.description }}</td>
+                  <td class="truncate size1">{{ ticket.author }}</td>
+                  <td>
+                  <div class="dropdown">
+                    <i class="material-icons more-vert-icon4" id="dropdownMenuButton{{ ticket.id }}" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-project-id="{{ project.id }}">more_vert</i>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ ticket.id }}">
+                      <a class="dropdown-item edit-ticket-link" data-ticket-id="{{ ticket.id }}" data-project-id="{{ project.id }}">Edit Ticket</a>
+                      <a class="dropdown-item delete-ticket-link" data-ticket-id="{{ ticket.id }}" data-project-id="{{ project.id }}">Delete Ticket</a>
+                    </div>
+                  </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+              <!--table dialog-->
+              <div>
+            </table>
+            <div>
+              <nav aria-label="...">
+                <ul class="pagination pagination-sm pt-1 ps-1">
+                  {% for page in page_range1 %}
+                  <li class="page-item text-color5 {%  if page_number1 == page %} active {% endif %}">
+                    <a class="page-link text-color5 {%  if page_number1 == page %} active {% endif %}" href="?page1={{ page }}" tabindex="-1">{{ page }}</a>
+                  </li>
+                  {% endfor %}
+                </ul>
+              </nav>
+            </div>
+      </div>
+     </div>
+      <!--the end of the tab-->
+    </div>
+    <div>
+      <div class="col-sm-12 rounded border-charts bg-light2 ms-1 mt-3 cu-width">
+        <div class="p-3 h6">Selected Ticket Info</div>
+        <div class="border-bottomx mb-3"></div>
+        <div class="row">
+          <div class="col-sm-6 rounded border-charts2 mt-2 pt-3 mb-3 ms-3 bg-light2 custom-width-s">
+          <div id="ticket-details">
+          <!--ticket_details-->
+          </div>
+          </div>
+         <div class="col-sm-6 rounded border-charts2 mt-2 ms-4 bg-light2 ">
+          <div id="ticket-comments">
+          <!--ticket_comments-->
+             </div>
+           </div>
+          </div>
+         </div>
+        </div>
+      </div>
+  </div>
+  </div>
+  </div>
+  </div>
+{% endblock %}
+{% block script %}
+<script src="{% static 'chart1.js' %}"></script>
+<script src="{% static 'chart2.js' %}"></script>
+<script src="{% static 'chart3.js' %}"></script>
+<script src="{% static 'index.js' %}"></script>
+{% endblock %}

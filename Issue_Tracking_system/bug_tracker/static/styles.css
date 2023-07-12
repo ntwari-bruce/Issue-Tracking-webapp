@@ -66,7 +66,7 @@
   color: rgb(120, 117, 117);
 }
 .width-custom3{
-  width: 350px
+  width: 350px;
 }
 .md-19{
   color: rgb(120, 117, 117);
@@ -208,6 +208,13 @@ tbody td {
   text-overflow: ellipsis;
   text-align: center;
 }
+.truncate2t {
+  max-width: auto; 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: start;
+}
 .custom-2a{
   width: 800px;
 }
@@ -264,4 +271,11 @@ tbody td {
 .alertx{
   color:red;
   font-size: smaller;
+}
+.active-link {
+  background-color: #c2dde6;
+}
+.pagination .page-item.active .page-link {
+  background-color: #458da5;
+  border: 1px solid #458da5;
 }

@@ -5,7 +5,7 @@ from django.db import models
 class CustomUser(AbstractUser):
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
-    phone_number = models.CharField(max_length=20)
+    phone_number = models.CharField(max_length=20,blank=False, null=False)
     
     # Add any other fields you need for your user model
 
@@ -17,6 +17,49 @@ class Project(models.Model):
     project_description = models.TextField()
     team_members = models.ManyToManyField(CustomUser)
     project_creator = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='created_projects', null=True)
+    tickets = models.ForeignKey('Ticket', on_delete=models.CASCADE, related_name='project_tickets', null=True)
 
     def __str__(self):
         return self.project_name
+
+class Ticket(models.Model):
+    STATUS_CHOICES = [
+        ('New', 'New'),
+        ('In Progress', 'In Progress'),
+        ('Completed', 'Completed'),
+    ]
+
+    PRIORITY_CHOICES = [
+        ('Low', 'Low'),
+        ('Medium', 'Medium'),
+        ('High', 'High'),
+    ]
+
+    TYPE_CHOICES = [
+        ('Bug', 'Bug'),
+        ('Feature', 'Feature'),
+        ('Task', 'Task'),
+    ]
+
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='project_tickets', null=True)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES)
+    ticket_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    estimated_time = models.IntegerField()
+    assigned_devs = models.ManyToManyField(CustomUser, related_name='assigned_tickets', blank=True)
+
+
+    def __str__(self):
+        return self.title
+
+class Comment(models.Model):
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name='comments', null=True)
+    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comment by {self.author.username} on {self.ticket.title}"
