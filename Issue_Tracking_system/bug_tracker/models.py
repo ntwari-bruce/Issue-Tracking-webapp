@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
+from django.utils import timezone
 
 class CustomUser(AbstractUser):
     first_name = models.CharField(max_length=150)
@@ -17,7 +17,6 @@ class Project(models.Model):
     project_description = models.TextField()
     team_members = models.ManyToManyField(CustomUser)
     project_creator = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='created_projects', null=True)
-    tickets = models.ForeignKey('Ticket', on_delete=models.CASCADE, related_name='project_tickets', null=True)
 
     def __str__(self):
         return self.project_name
@@ -44,7 +43,7 @@ class Ticket(models.Model):
     project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='project_tickets', null=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
-    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
+    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES)
     ticket_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
@@ -57,9 +56,19 @@ class Ticket(models.Model):
 
 class Comment(models.Model):
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name='comments', null=True)
-    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Comment by {self.author.username} on {self.ticket.title}"
+
+
+class Notification(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, null=True)
+    message = models.CharField(max_length=255)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.message}"

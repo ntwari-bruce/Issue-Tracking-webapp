@@ -1,8 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, request, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
-from django.db import IntegrityError
-from .models import CustomUser, Project, Ticket, Comment
+from django.db import IntegrityError, models
+from .models import CustomUser, Project, Ticket, Comment, Notification
 from django.contrib import auth
 from django.contrib.auth import authenticate,login as auth_login, logout as auth_logout, get_backends
 from django.urls import reverse
@@ -12,6 +12,11 @@ from django.core.paginator import Paginator
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.serializers import serialize
+from datetime import datetime, timedelta, time
+from django.utils import timezone
+
+
+
 
 
 # Create your views here
@@ -110,6 +115,17 @@ def create_project(request):
         project.save()
         team_members = CustomUser.objects.filter(pk__in=team_members_ids)
         project.team_members.set(team_members)
+        # sending a notification to another user
+        for member in list(team_members):
+            if member != request.user:
+                notification = Notification(
+                    user = member,
+                    project = project,
+                    message = f"You have been added to the project &nbsp;<b>{project.project_name}</b>",
+                    created_at = timezone.now()
+                )
+                notification.save()
+
         return HttpResponseRedirect(reverse("index"))
         
 
@@ -141,6 +157,16 @@ def update_project(request):
         project.save()
         team_members = CustomUser.objects.filter(pk__in=team_members_ids)
         project.team_members.set(team_members)
+        # notify the users involved in the project
+        for member in list(team_members):
+            if member != request.user:
+                notification = Notification(
+                    user = member,
+                    project = project,
+                    message =  f"The project &nbsp;<b>{project.project_name}</b> &nbsp;have been added updated",
+                    created_at = timezone.now()
+                )
+                notification.save()
         return HttpResponseRedirect(reverse("index"))
 
 #deleting a project
@@ -150,6 +176,7 @@ def delete_project(request, id):
         try:
             project = Project.objects.get(id=id)
             project.delete()
+
             return JsonResponse({"message": "Project deleted successfully"})
         except Project.DoesNotExist:
             return JsonResponse({"error": "Project not found"}, status=404)
@@ -184,7 +211,7 @@ def project_view(request, id):
             "tickets": page_obj1
         })
 
-# updating members
+# updating members for the project
 def update_members(request, id):
     project = Project.objects.get(id=id)
 
@@ -194,6 +221,16 @@ def update_members(request, id):
         # Getting the team members
         team_members = CustomUser.objects.filter(pk__in=team_members_ids)
         project.team_members.set(team_members)
+        # notifying the new members
+        for member in list(team_members):
+            if member != request.user:
+                notification = Notification(
+                    user = member,
+                    project = project,
+                    message = f"you have been assigned to the project &nbsp;<b>{project.project_name}</b",
+                    created_at = timezone.now()
+                )
+                notification.save()
         return HttpResponseRedirect(reverse("project_view", kwargs={"id": id}))
 
 # deleting a team_member from the project
@@ -202,6 +239,15 @@ def delete_member(request, project_id, member_id):
         project = get_object_or_404(Project, id=project_id)
         team_member = get_object_or_404(CustomUser, id=member_id)
         project.team_members.remove(team_member)
+
+        # notify the member
+        if team_member != request.user:
+            notification = Notification(
+                user = team_member,
+                project = project,
+                message = f"You have been removed from the project &nbsp;<b>{ project.project_name }</b>"
+            )
+            notification.save()
         # Return an empty response with status code 204 (No Content)
         return HttpResponse(status=204)  
 
@@ -218,6 +264,8 @@ def create_ticket(request, project_id):
 
         # Get the project instance
         project = Project.objects.get(id=project_id)
+        # project team_members
+        members_project = project.team_members.all()
         
 
         # Create the ticket
@@ -232,9 +280,20 @@ def create_ticket(request, project_id):
             estimated_time=time_estimate
         )
         # assigned devs
-        team_members = CustomUser.objects.filter(pk__in=team_members_ids)
+        # Filter team_members who are also part of members_project
+        team_members = members_project.filter(id__in=team_members_ids)
+ 
         ticket.assigned_devs.set(team_members)
-
+        # notify the members
+        for member in list(team_members):
+            if member != request.user:
+                notification = Notification(
+                    user=member,
+                    project=project,
+                    message=f"You have been assigned to the Ticket &nbsp;<b>{title}</b",
+                    created_at=timezone.now()
+                )
+                notification.save()
         # Redirect to the project details page
         return HttpResponseRedirect(reverse("project_view", kwargs={"id": project_id}))
 
@@ -244,8 +303,24 @@ def delete_ticket(request, project_id, ticket_id):
     if request.method == "DELETE":
         project = get_object_or_404(Project, id=project_id)
         ticket = get_object_or_404(Ticket, id=ticket_id)
-        project.project_tickets.remove(ticket)
-        return HttpResponse(status=204)
+        team_members = ticket.project.team_members.all()
+        ticket_name = ticket.title
+        # Ensure the ticket belongs to the project before deleting it
+        if ticket.project == project:
+            ticket.delete()
+            # notify the users who were assigned
+            for member in list(team_members):
+                if member != request.user:
+                    notification = Notification(
+                        user=member,
+                        project=project,
+                        message=f"Ticket &nbsp;<b>{ticket_name}</b> &nbsp;have been deleted from the project<b>&nbsp;{project.project_name}</b>",
+                        created_at=timezone.now()
+                    )
+                    notification.save()
+            return HttpResponse(status=204)
+        else:
+            return HttpResponse(status=404)
     else:
         return HttpResponse(status=405) 
 
@@ -287,7 +362,6 @@ def update_ticket(request, project_id):
         time_estimate = request.POST.get('Time')  
         priority = request.POST.get('priority')  
         status = request.POST.get('status') 
-        print("This is the ticket id:", ticket_id)
         # Update the ticket object with the new values
         ticket = Ticket.objects.get(id=ticket_id)
         ticket.title = title
@@ -297,6 +371,18 @@ def update_ticket(request, project_id):
         ticket.priority = priority
         ticket.status = status
         ticket.save()
+        # Notify the assigned developers about the ticket update
+        assigned_developers = CustomUser.objects.filter(pk__in=assigned_devs)
+        for dev in assigned_developers:
+            if dev != request.user:
+                notification = Notification(
+                    user=dev,
+                    project=project,
+                    message=f"The ticket &nbsp; <b>{ticket.title}</b>&nbsp; has been updated.",
+                    created_at=timezone.now()
+                )
+                notification.save()
+
 
         return HttpResponseRedirect(reverse("project_view", kwargs={"id": project_id}))
 
@@ -334,9 +420,9 @@ def get_ticket_details(request, project_id, ticket_id):
     return JsonResponse(data)
 
 
-# saving the comment
+# saving a comment  
 def save_comment(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         ticket_id = request.POST.get('ticketId')
         project_id = request.POST.get('projectId')
         content = request.POST.get('content')
@@ -358,7 +444,18 @@ def save_comment(request):
             'created_at': comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'content': comment.content
         }
-        print("These are the response data:",response_data)
+        # Notify the assigned developers about the comment
+        ticket = Ticket.objects.get(id=ticket_id)
+        assigned_devs = ticket.assigned_devs.all()
+        for dev in list(assigned_devs):
+            if dev != request.user:
+                notification = Notification(
+                    user=dev,
+                    project=ticket.project,
+                    message=f"A new comment has been added to the ticket &nbsp;<b>{ticket.title}</b>.",
+                    created_at=timezone.now()
+                )
+                notification.save()
         return JsonResponse(response_data)
 
 # delete comment
@@ -369,3 +466,70 @@ def delete_comment(request, comment_id):
         return HttpResponse(status=204)
     else:
         return HttpResponse(status=405)
+
+# all the user tickets
+def tickets(request):
+    if request.method == "GET":
+        tickets = Ticket.objects.filter(author=request.user)
+        paginator4 = Paginator(tickets, 10)
+        page_number4 = request.GET.get('page4')
+        page_obj4 = paginator4.get_page(page_number4)
+        return render(request, "bug_tracker/tickets.html", {
+            "tickets": page_obj4,
+            "page_range4": paginator4.page_range,
+            "page_number4": page_obj4.number,
+
+        })
+# getting ticket count by type
+def chart_data(request):
+    if request.method == "GET":
+        # Retrieve the ticket data
+        ticket_data = Ticket.objects.values("ticket_type").annotate(ticket_count=models.Count("id"))
+
+        # Prepare the data for JSON serialization
+        data = list(ticket_data)
+
+        # Return the data as JSON response
+        return JsonResponse(data, safe=False)
+# getting second chart data
+def chart_data2(request):
+    if request.method == "GET":
+        # Retrieve The ticket data
+        ticket_data = Ticket.objects.values("priority").annotate(ticket_count=models.Count("id"))
+        data = list(ticket_data)
+        # return data as a json response
+        return JsonResponse(data, safe=False)
+
+# getting third chart data
+def chart_data3(request):
+    if request.method == "GET":
+        # Retrieve the ticket data
+        ticket_data = Ticket.objects.values("status").annotate(ticket_count=models.Count("id"))
+        data = list(ticket_data)
+        # return data as a json response
+        return JsonResponse(data, safe=False)
+
+# view for all notifications
+def notifications(request):
+    if request.method == "GET":
+        notifications = Notification.objects.filter(user=request.user)
+
+        # Get the current datetime with the appropriate timezone
+        now = timezone.now()
+
+        # Define the time threshold for moving notifications from "Today" to "Older"
+        threshold = now - timedelta(seconds=60)
+
+        today_notifications = notifications.filter(created_at__gte=threshold)
+        older_notifications = notifications.filter(created_at__lt=threshold)
+
+        if today_notifications.exists():
+            return render(request, "bug_tracker/notifications.html", {
+                "notifications": today_notifications,
+                "older_notifications": older_notifications
+            })
+        else:
+            return render(request, "bug_tracker/notifications.html", {
+                "none_notification": "You have no new notifications!",
+                "older_notifications": older_notifications
+            })

@@ -180,7 +180,6 @@ $(document).on('click', '.delete-ticket-link', function () {
     });
   }
 });
-
 document.addEventListener('DOMContentLoaded', function() {
   // Function to handle the click event on the ticket row
   function handleTicketClick(event) {
@@ -328,15 +327,17 @@ document.addEventListener('DOMContentLoaded', function() {
                       </div>
                       <div class="d-flex justify-content-between">
                         <div class="size3 ps-2">${savedComment.content}</div>
-                        <div>
-                          <span class="material-icons align-text-center more-vert-icon2 pe-3">
-                            more_horiz
-                          </span>
+                        <div class="dropdown">
+                        <i class="material-icons more-vert-iconx" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >more_horiz</i>
+                        <div class="dropdown-menu">
+                          <a class="dropdown-item delete-comment-link" data-comment-id="${ savedComment.id }">Delete Comment</a>
                         </div>
+                      </div>
                       </div>
                     </div>
                   `;
                   commentsContainer.insertAdjacentHTML('afterbegin', newCommentHTML);
+                  
 
                   // Clear the comment input field
                   commentInput.value = '';
@@ -390,3 +391,4 @@ document.addEventListener('DOMContentLoaded', function() {
     ticketRow.addEventListener('click', handleTicketClick);
   });
 });
+

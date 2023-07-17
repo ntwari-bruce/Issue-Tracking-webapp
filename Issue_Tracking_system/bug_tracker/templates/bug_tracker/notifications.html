@@ -1,0 +1,67 @@
+{% extends "bug_tracker/layout.html" %}
+
+{% block title %}Notifications{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<div class="col-sm-10">
+    <div class="pt-3 ps-2 h4 pb-3">Notifications</div>
+    <div class="row">
+        <div class="col-sm-12 bg-light2 border-charts mt-5 rounded notification-container">
+            <div class="d-flex justify-content-between">
+                <div class="h5 today">Today</div>
+                <div class="dismiss"><a id="dismiss-all" class="y-n" href="#">Dismiss All</a></div>
+            </div>
+            {% if none_notification %}
+                <p>{{ none_notification }}</p>
+            {% endif %}
+
+            {% if notifications %}
+                {% for notification in notifications %}
+                    <div class="card notification-card notification-invitation mt-1">
+                        <div class="card-body">
+                            <table>
+                                <tr>
+                                    <td style="width:70%">
+                                        <div class="card-title">
+                                            <span class="material-icons">account_circle</span>
+                                            {{ notification.message|safe }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="d-flex justify-content-between mt-3">
+                <div class="h5 older">Older</div>
+            </div>
+            {% if older_notifications %}
+                {% for notification in older_notifications %}
+                    <div class="card notification-card notification-invitation">
+                        <div class="card-body">
+                            <table>
+                                <tr>
+                                    <td style="width:70%">
+                                        <div class="card-title">
+                                            <span class="material-icons">account_circle</span>
+                                            {{ notification.message|safe }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+<script src="{% static 'notifications.js' %}"></script>
+<script src="{% static 'index.js' %}"></script>
+{% endblock %}

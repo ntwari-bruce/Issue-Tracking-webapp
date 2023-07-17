@@ -1,0 +1,53 @@
+{% extends "bug_tracker/layout.html" %}
+
+{% block title %}Tickets{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<div class="col-sm-10">
+    <div class="pt-3 ps-2 h4 pb-3"> Tickets</div>
+    <div class="row">
+      <div class="col-sm-12 bg-light2 border-charts mt-5 ms-3 rounded">
+          <div class="d-flex justify-content-between">
+              <div class="h6 pt-3 ps-2"> Tickets </div>
+          </div>
+          <div>
+              <table class="table-responsive table-hover">
+                  <thead>
+                    <tr>
+                      <th>Project</th>
+                      <th>Ticket</th>
+                      <th>Status</th>
+                      <th>Days Outstanding</th>
+                      <th>Priority</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for ticket in tickets %}
+                       <tr>
+                        <td class="text-color5 size1"><b><a class="text-color5 size1 x" href="{% url 'project_view' ticket.project.id %}">{{ ticket.project.project_name }}</b></a></td>
+                        <td class="truncate size1">{{ ticket.title }}</td>
+                        <td class="truncate size1">{{ ticket.status }}</td>
+                        <td class="truncate size1">{{ ticket.estimated_time }}</td>
+                        <td class="truncate size1">{{ ticket.priority }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+                <div>
+                  <nav aria-label="...">
+                    <ul class="pagination pagination-sm pt-1 ps-1">
+                      {% for page in page_range4 %}
+                      <li class="page-item text-color5 {%  if page_number4 == page %} active {% endif %}">
+                        <a class="page-link text-color5 {%  if page_number4 == page %} active {% endif %}" href="?page4={{ page }}" tabindex="-1">{{ page }}</a>
+                      </li>
+                      {% endfor %}
+                    </ul>
+                  </nav>
+                </div>
+          </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
