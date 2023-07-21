@@ -14,20 +14,31 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core.serializers import serialize
 from datetime import datetime, timedelta, time
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.core.mail import send_mail
+from django.conf import settings
 
 
-
-
+def layout(request):
+    return render(request, "bug_tracker/layout.html")
 
 # Create your views here
+@login_required(login_url='layout')
 def index(request):
     if request.method == 'GET':
         # Get all users in the system
         users = CustomUser.objects.all()
 
         # Get all projects
-        projects = Project.objects.all().order_by("id")
-
+        projects = Project.objects.all().order_by("-id")
+        # get the permission for the current user
+        group_names = request.user.groups.values_list('name', flat=True)
+       
         # Pagination
         paginator = Paginator(projects, 5)  # Display 5 projects per page
         page_number = request.GET.get('page')
@@ -39,6 +50,7 @@ def index(request):
             "project_list": page_obj,
             "page_range": paginator.page_range,
             "page_number": page_obj.number,
+            "group_names": group_names
         })
 
 # Registering for the user account
@@ -95,7 +107,68 @@ def login_view(request):
     else:
         return render(request, "bug_tracker/layout.html")
 
+# Reset password
+def forgot_password(request):
+    if request.method == "POST":
+        if request.method == 'POST':
+            email = request.POST.get('email')
+            try:
+                user = CustomUser.objects.get(email=email)
+            except User.DoesNotExist:
+                # User not found, show a warning message using messages framework
+                messages.warning(request, 'User with this email does not exist.')
+            else:
+                token = default_token_generator.make_token(user)
+                uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+
+                reset_url = request.build_absolute_uri(reverse('reset_password', kwargs={'uidb64': uidb64, 'token': token}))
+                # Sending the plain text email
+                email_message = f"Hello {user.username},\n\nYou have requested to reset your password. Click on the link below to reset your password:\n\n{reset_url}\n\nIf you did not request this password reset, please ignore this email.\n\nBest regards"
+
+                send_mail(
+                    'Password Reset Request',
+                    email_message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email],
+                    fail_silently=False,
+                )
+                # Show success message when email is sent
+                messages.success(request, 'An email with instructions to reset your password has been sent to your email address.')
+    return render(request, 'bug_tracker/forgot_password.html')
+
+# verification for password reset
+def reset_password(request, uidb64, token):
+    if request.method == "GET":
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = CustomUser.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+            return redirect('layout') 
+        
+        if default_token_generator.check_token(user, token):
+            return render(request, "bug_tracker/reset_password.html", {"id": user.id})
+    
+
+# Update the password
+def update_password(request, id):
+    user = CustomUser.objects.get(pk=id)
+    if request.method == "POST":
+        new_password = request.POST.get("new_password")
+        new_password_confirm = request.POST.get("new_password_confirm")
+        if new_password != new_password_confirm:
+            messages.warning(request, 'Passwords should match')
+        else:
+            user.set_password(new_password)
+            user.save()
+            return HttpResponseRedirect(reverse("layout"))
+    else:
+        return render(request, "bug_tracker/reset_password.html",{
+            "user": user
+        })
+
+   
 # logout the user
+@login_required(login_url='layout')
 def logout(request):
     if request.method == "POST":
         auth_logout(request)
@@ -106,6 +179,7 @@ def layout(request):
     return render(request, "bug_tracker/layout.html",)
 
 # Creating a new project
+@login_required(login_url='layout')
 def create_project(request):
     if request.method == "POST":
         project_name = request.POST.get("project_name")
@@ -130,6 +204,7 @@ def create_project(request):
         
 
 # Retrieving project details for editing project
+@login_required(login_url='layout')
 def project_detail(request, pk):
     try:
         project = Project.objects.get(pk=pk)
@@ -143,6 +218,7 @@ def project_detail(request, pk):
         return JsonResponse({'error': 'Project not found'}, status=404)
 
 # Updating the edited project
+@login_required(login_url='layout')
 def update_project(request):
     if request.method == "POST":
         project_id = request.POST.get("project_id")
@@ -170,6 +246,7 @@ def update_project(request):
         return HttpResponseRedirect(reverse("index"))
 
 #deleting a project
+@login_required(login_url='layout')
 def delete_project(request, id):
     if request.method == "DELETE":
         # Handle any error that might happen
@@ -185,6 +262,7 @@ def delete_project(request, id):
         return HttpResponseRedirect(reverse("index"))
 
 # Project full details
+@login_required(login_url='layout')
 def project_view(request, id):
     if request.method == "GET":
         users = CustomUser.objects.all()
@@ -192,6 +270,9 @@ def project_view(request, id):
         team_members = project.team_members.all().order_by("id")
         # querying for all the tickets
         tickets = project.project_tickets.all().order_by("id")
+        # user permissions
+        group_names = request.user.groups.values_list('name', flat=True)
+    
         # pagination for tickets
         paginator1 = Paginator(tickets, 4)
         page_number1 = request.GET.get('page1')
@@ -208,10 +289,12 @@ def project_view(request, id):
             "users": users,
             "page_range1": paginator1.page_range,
             "page_number1": page_obj1.number,
-            "tickets": page_obj1
+            "tickets": page_obj1,
+            "group_names": group_names
         })
 
 # updating members for the project
+@login_required(login_url='layout')
 def update_members(request, id):
     project = Project.objects.get(id=id)
 
@@ -234,6 +317,7 @@ def update_members(request, id):
         return HttpResponseRedirect(reverse("project_view", kwargs={"id": id}))
 
 # deleting a team_member from the project
+@login_required(login_url='layout')
 def delete_member(request, project_id, member_id):
     if request.method == "DELETE":
         project = get_object_or_404(Project, id=project_id)
@@ -252,6 +336,7 @@ def delete_member(request, project_id, member_id):
         return HttpResponse(status=204)  
 
 # creating a tciket
+@login_required(login_url='layout')
 def create_ticket(request, project_id):
     if request.method == "POST":
         title = request.POST.get("title")
@@ -299,6 +384,7 @@ def create_ticket(request, project_id):
 
 
 # delete a ticket
+@login_required(login_url='layout')
 def delete_ticket(request, project_id, ticket_id):
     if request.method == "DELETE":
         project = get_object_or_404(Project, id=project_id)
@@ -325,6 +411,7 @@ def delete_ticket(request, project_id, ticket_id):
         return HttpResponse(status=405) 
 
 # editing the ticket
+@login_required(login_url='layout')
 def edit_ticket(request, project_id, ticket_id):
     try:
         project = Project.objects.get(id=project_id)
@@ -351,7 +438,8 @@ def edit_ticket(request, project_id, ticket_id):
     except Project.DoesNotExist:
         return JsonResponse({'error': 'ticket not found'}, status=404)
 
-# update the edited ticket   
+# update the edited ticket  
+@login_required(login_url='layout') 
 def update_ticket(request, project_id):
     project = Project.objects.get(id=project_id)  
     if request.method == "POST":
@@ -367,7 +455,7 @@ def update_ticket(request, project_id):
         ticket.title = title
         ticket.description = description
         ticket.assigned_devs.set(assigned_devs)  
-        ticket.time_estimate = time_estimate
+        ticket.estimated_time = time_estimate
         ticket.priority = priority
         ticket.status = status
         ticket.save()
@@ -387,6 +475,7 @@ def update_ticket(request, project_id):
         return HttpResponseRedirect(reverse("project_view", kwargs={"id": project_id}))
 
 # getting the details for the ticket
+@login_required(login_url='layout')
 def get_ticket_details(request, project_id, ticket_id):
     ticket = Ticket.objects.get(id=ticket_id)
     assigned_devs = ticket.assigned_devs.all()
@@ -421,6 +510,7 @@ def get_ticket_details(request, project_id, ticket_id):
 
 
 # saving a comment  
+@login_required(login_url='layout')
 def save_comment(request):
     if request.method == "POST":
         ticket_id = request.POST.get('ticketId')
@@ -459,6 +549,7 @@ def save_comment(request):
         return JsonResponse(response_data)
 
 # delete comment
+@login_required(login_url='layout')
 def delete_comment(request, comment_id):
     if request.method == "POST":
         comment = get_object_or_404(Comment, id=comment_id)
@@ -468,9 +559,10 @@ def delete_comment(request, comment_id):
         return HttpResponse(status=405)
 
 # all the user tickets
+@login_required(login_url='layout')
 def tickets(request):
     if request.method == "GET":
-        tickets = Ticket.objects.filter(author=request.user)
+        tickets = Ticket.objects.filter(author=request.user).order_by("id")
         paginator4 = Paginator(tickets, 10)
         page_number4 = request.GET.get('page4')
         page_obj4 = paginator4.get_page(page_number4)
@@ -481,6 +573,7 @@ def tickets(request):
 
         })
 # getting ticket count by type
+@login_required(login_url='layout')
 def chart_data(request):
     if request.method == "GET":
         # Retrieve the ticket data
@@ -492,6 +585,7 @@ def chart_data(request):
         # Return the data as JSON response
         return JsonResponse(data, safe=False)
 # getting second chart data
+@login_required(login_url='layout')
 def chart_data2(request):
     if request.method == "GET":
         # Retrieve The ticket data
@@ -501,6 +595,7 @@ def chart_data2(request):
         return JsonResponse(data, safe=False)
 
 # getting third chart data
+@login_required(login_url='layout')
 def chart_data3(request):
     if request.method == "GET":
         # Retrieve the ticket data
@@ -510,6 +605,7 @@ def chart_data3(request):
         return JsonResponse(data, safe=False)
 
 # view for all notifications
+@login_required(login_url='layout')
 def notifications(request):
     if request.method == "GET":
         notifications = Notification.objects.filter(user=request.user)
@@ -533,3 +629,13 @@ def notifications(request):
                 "none_notification": "You have no new notifications!",
                 "older_notifications": older_notifications
             })
+
+# Delete all notifications
+@login_required(login_url='layout')
+def delete_all_notifications(request):
+    if request.method == "POST":
+        # Delete all the notifications in the system
+        Notification.objects.filter(user=request.user).delete()
+        return HttpResponse(status=204)
+    else:
+        return HttpResponse(status=405)

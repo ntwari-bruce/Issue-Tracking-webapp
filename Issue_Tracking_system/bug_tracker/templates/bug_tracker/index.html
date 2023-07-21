@@ -11,7 +11,9 @@
       <div class="col-sm-12 bg-light2 border-charts mt-5 ms-3 rounded">
           <div class="d-flex justify-content-between">
               <div class="h6 pt-3 ps-2"> Projects {{ proect_id }}</div>
+              {% if 'Project_Manager' in group_names %}
               <div class="pt-3"><button type="button" class="btn btn-color2 btn-color2-shadow btn-sm" data-bs-toggle="modal" data-bs-target="#myModal">New Project</button></div>
+              {% endif %}
           </div>
           <div>
              <!-- The Modal for editing a project-->
@@ -116,6 +118,7 @@
                         <td class="truncate size1">{{ project.project_description }}</td>
                         <td class="truncate size1">{{ project.team_members.all|join:", " }}</td>
                         <td>
+                          {% if project.project_creator == request.user %}
                           <div class="dropdown">
                             <i class="material-icons more-vert-icon4" id="dropdownMenuButton{{ project.id }}" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-project-id="{{ project.id }}">more_vert</i>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ project.id }}">
@@ -123,6 +126,7 @@
                               <a class="dropdown-item delete-linkp" data-project-id="{{ project.id }}">Delete project</a>
                             </div>
                           </div>
+                          {% endif %}
                         </td>
                       </tr>
                     {% endfor %}

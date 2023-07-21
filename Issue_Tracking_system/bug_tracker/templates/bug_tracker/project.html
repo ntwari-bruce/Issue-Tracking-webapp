@@ -299,7 +299,9 @@
                     <i class="material-icons more-vert-icon4" id="dropdownMenuButton{{ ticket.id }}" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-project-id="{{ project.id }}">more_vert</i>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ ticket.id }}">
                       <a class="dropdown-item edit-ticket-link" data-ticket-id="{{ ticket.id }}" data-project-id="{{ project.id }}">Edit Ticket</a>
+                      {% if request.user == ticket.author  %}
                       <a class="dropdown-item delete-ticket-link" data-ticket-id="{{ ticket.id }}" data-project-id="{{ project.id }}">Delete Ticket</a>
+                      {% endif %}
                     </div>
                   </div>
                   </td>

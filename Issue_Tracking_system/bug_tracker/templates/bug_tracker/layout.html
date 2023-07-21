@@ -42,7 +42,7 @@
                       <li class="nav-item">
                         <a class="nav-link " href="{% url 'notifications'%}"><span class="material-icons md2-17 md-light3">
                           notifications
-                          </span> <span class="align-top ps-2 text-color4">Notifications<span class="badge bg-danger ms-1">4</span></span></a>
+                          </span> <span class="align-top ps-2 text-color4">Notifications<span class="badge bg-danger ms-1">{{ new_count }}</span></span></a>
                       </li>
                       <li class="nav-item mt-3">
                           <div class="border-bottom mt-3 mb-2"></div>
@@ -59,6 +59,7 @@
                   </div>
                 </nav>
           </div>
+          
             {% block content %}
             {% endblock %}
             {% block script %}
@@ -89,7 +90,7 @@
                 <div class="col-sm-12 mt-2 custom-width mx-auto ">
                     <div class="input-group mb-1">
                         <span class="material-symbols-outlined border-div2 shadow-div1 rounded1 input-custom input-group-text">key</span>
-                        <input type="text" class="form-control border-div2 shadow-div1 rounded1" name="password" placeholder="password">
+                        <input type="password" class="form-control border-div2 shadow-div1 rounded1" name="password" placeholder="password">
                       </div>
                       {% if message %}
                       <p style="color: red; font-size: smaller;" class="text-center">{{ message }}</p>
@@ -117,7 +118,7 @@
     </form>
       <div class="d-flex mt-2 mx-auto custom-width2">
         <div class="col-sm-6 text-start text-white custom-font2">
-                forgot Password?
+          <a class="text-color2 custom-font2 x" href="{% url 'forgot_password' %}">Forgot password?</a>
         </div>
         <div class="col-sm-6 text-end x">
                <a class="text-color2 custom-font2 x" href="{% url 'register' %}">Create Account</a>
