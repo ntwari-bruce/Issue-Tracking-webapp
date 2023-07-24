@@ -7,7 +7,7 @@
 {% block content %}
 <div class="col-sm-10">
     <div class="pt-3 ps-2 h4 pb-3"> DASHBOARD</div>
-    <div class="row">
+      <div class="row">
       <div class="col-sm-12 bg-light2 border-charts mt-5 ms-3 rounded">
           <div class="d-flex justify-content-between">
               <div class="h6 pt-3 ps-2"> Projects {{ proect_id }}</div>
@@ -112,9 +112,7 @@
                   <tbody>
                     {% for project in project_list %}
                       <tr>
-                        
-                        <td class="text-color5 size1"><b><a class="text-color5 size1 x" href="{% url 'project_view' project.id %}">{{ project.project_name }}</b></a></td>
-                        
+                        <td class="text-color5 size1"><b><a class="text-color5 size1 x" href="{% url 'project_view' project.id %}">{{ project.project_name }}</a></b></td>                      
                         <td class="truncate size1">{{ project.project_description }}</td>
                         <td class="truncate size1">{{ project.team_members.all|join:", " }}</td>
                         <td>
