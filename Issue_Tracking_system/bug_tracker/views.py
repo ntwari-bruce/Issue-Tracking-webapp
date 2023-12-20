@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404,redirect
 from django.http import HttpResponse, request, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError, models
-from .models import CustomUser, Project, Ticket, Comment, Notification
+from .models import CustomUser, Project, Ticket, Comment, Notification, PasswordResetToken
 from django.contrib import auth
 from django.contrib.auth import authenticate,login as auth_login, logout as auth_logout, get_backends
 from django.urls import reverse
@@ -21,6 +21,10 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.mail import send_mail
 from django.conf import settings
+
+# Password reset link expiration
+# In minutes
+EXPIRATION_TIME = 2 
 
 
 def layout(request):
@@ -162,6 +166,12 @@ def forgot_password(request):
                 token = default_token_generator.make_token(user)
                 uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
                 reset_url = request.build_absolute_uri(reverse('reset_password', kwargs={'uidb64': uidb64, 'token': token}))
+                expiration_time = timezone.now() + timedelta(minutes=EXPIRATION_TIME)
+                PasswordResetToken.objects.create(
+                    user=user,
+                    token=token,
+                    expiration_time = expiration_time
+                )
                 # Sending the plain text email
                 email_message = f"Hello {user.username},\n\nYou have requested to reset your password. Click on the link below to reset your password:\n\n{reset_url}\n\nIf you did not request this password reset, please ignore this email.\n\nBest regards"
                 send_mail(
@@ -195,7 +205,9 @@ def reset_password(request, uidb64, token):
             user = CustomUser.objects.get(pk=uid)
         except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
             return redirect('layout') 
-        
+        password_reset_token = PasswordResetToken.objects.get(user=user, token=token)
+        if password_reset_token.is_expired():
+            return HttpResponse("Password reset Link is expired")
         if default_token_generator.check_token(user, token):
             return render(request, "bug_tracker/reset_password.html", {"id": user.id})
 

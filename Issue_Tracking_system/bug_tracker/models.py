@@ -75,3 +75,11 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.message}"
+
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
+    token = models.CharField(max_length=1000)
+    expiration_time = models.DateTimeField()
+
+    def is_expired(self):
+        return self.expiration_time < timezone.now()
